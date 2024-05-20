@@ -10,10 +10,36 @@ namespace SolestrideAPI.Controllers
 
         List<Comprador> compradores = new Comprador().compradoresList();
 
+        public async Task<string> getMethod(string url)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        return (responseBody.ToString());
+                    }
+                    else
+                    {
+                       return "Erro ao fazer a requisição";
+                    }
+                }
+                catch (Exception e)
+                {
+                    return "erro" + e;
+                }
+            }
+        }
+
         [HttpGet]
         public IActionResult get()
         {
-            return Ok(compradores);
+            return Ok(getMethod("https://servicodados.ibge.gov.br/api/v1/localidades/distritos/520005005"));
         }
 
         [HttpGet("{id}")]
