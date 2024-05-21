@@ -8,11 +8,53 @@ namespace SolestrideAPI.Controllers
     public class RequisicaoController : Controller
     {
         List<Requisicao> requisicoes = new Requisicao().requisicaoesList();
+        public async Task<string> getMethod(string url)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        return responseBody;
+                    }
+                    else
+                    {
+                        return $"Erro ao fazer a requisição: {response.StatusCode} - {response.ReasonPhrase}";
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    return $"Erro de requisição HTTP: {e.Message}";
+                }
+                catch (Exception e)
+                {
+                    return $"Erro: {e.Message}";
+                }
+            }
+        }
 
         [HttpGet]
-        public IActionResult get()
+        public async Task<IActionResult> get()
         {
-            return Ok(requisicoes);
+            try
+            {
+                string result = await getMethod("http://localhost:8080/requisicao");
+
+                if (result.StartsWith("Erro"))
+                {
+                    return StatusCode(500, result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Erro ao processar a requisição: {e.Message}");
+            }
         }
 
         [HttpGet("{id}")]
